@@ -1,2 +1,4 @@
 # we want to ignore our data directory (obviously)
 data/
+
+.DS_Store
