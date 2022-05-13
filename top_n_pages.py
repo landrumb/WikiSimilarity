@@ -2,13 +2,12 @@
 import pandas as pd
 import os
 import requests
-import gzip
 from faker import Faker
 import datetime
 import warnings
 
 ENGLISH_WIKIS = ['en', 'en.m']
-PAGE_TYPE_REGEX = '^((User)|(Talk)|(Wikipedia)|(Special)|(Portal)):'
+PAGE_TYPE_REGEX = '^((User)|(Talk)|(Wikipedia)|(Special)|(Portal)|(File)):'
 N = 10 ** 5
 OUTPUT_FILE = 'ten_k_most_viewed_pages.csv'
 DATA_DIR = 'testdata'
