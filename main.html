@@ -14561,105 +14561,322 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
     </script>
     <!-- End of mathjax configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">get</span>
 
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Correlation-Between-Semantic-Similarity-and-Wikipedia-Distance">Correlation Between Semantic Similarity and Wikipedia Distance<a class="anchor-link" href="#Correlation-Between-Semantic-Similarity-and-Wikipedia-Distance">&#182;</a></h1><h3 id="CMSC-320,-Spring-2022">CMSC 320, Spring 2022<a class="anchor-link" href="#CMSC-320,-Spring-2022">&#182;</a></h3><h4 id="Ben-Landrum,-Gaetan-Almela,-and-Nav-Bindra">Ben Landrum, Gaetan Almela, and Nav Bindra<a class="anchor-link" href="#Ben-Landrum,-Gaetan-Almela,-and-Nav-Bindra">&#182;</a></h4>
-</div>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The Wikipedia link graph is a graph where vertices represent Wikipedia articles and directed edges from vertex $A$ to vertex $B$ represent a link to $B$ in the text of $A$. We define Wikipedia distance between pages $A$ and $B$ to be the minimum number of links required to get from $A$ to $B$ in the Wikipedia link graph, where the first such link is on page $A$, the second is on the page the first link points to, and so on, until a link to $B$ is found.</p>
-<p>Word2Vec is a popular tool for computing word embeddings, which use a vector space representation of words to place them in an abstract space where similar vectors indicate that words appear in similar contexts. These vectors can then be compared to find a metric of semantic similarity between words.</p>
-<p>Because pages on Wikipedia contain links which are relevant to the topic the page is covering, similar topics are often closely if not directly linked. Therefore, it stands to reason that if semantic similarity is a valid metric of similarity between topics, a higher semantic similarity between two topics should correspond to a lower Wikipedia distance between said topics. We are looking to test the hypothesis that there exists a negative correlation between Wikipedia distance and Word2Vec semantic similarity. Our null hypothesis is that there does not exist a statistically significant negative correlation between Wikipedia distance and Word2Vec semantic similarity.</p>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+</pre></div>
+
+     </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Computing-Semantic-Similarity-with-Word2Vec">Computing Semantic Similarity with Word2Vec<a class="anchor-link" href="#Computing-Semantic-Similarity-with-Word2Vec">&#182;</a></h2>
-</div>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>This is not hard. If we wanted to pad it we could compute our own embedding, which would probably make it seem a little less trivial and would honestly be really easy, just involves a lot of text being loaded.</strong></p>
 
 </div>
-</div>
-</div>
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Computing-Wikipedia-Distance">Computing Wikipedia Distance<a class="anchor-link" href="#Computing-Wikipedia-Distance">&#182;</a></h2>
-</div>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>This will be very computationally expensive for articles which are far apart or have particularly high degrees, and will require the loading of a prohibitively large database of links between Wikipedia articles. Said database should probably be on a local SQL server.</strong></p>
+<p>Before we start scraping Wikipedia, we have to define some constants for our scraper. Scraping Wikipedia is suprisingly easy, the DOM tree and class names are very consistent. Despite this, Wikipedia still has a lot of garbage links that we don't want. This is where we define all of our rules for what counts as a "bad" link.  Examples of bad links include images, self links, internal links (links to enlarge photos, believe it or not), or invisible links that take you to the top of the page.</p>
+<p>One might think to simply filter by links containing <code>/wiki/</code>, but even those links aren't safe. Indeed Wikipedia contains various different types of internal <code>/wiki/</code> links that point to various medias, template pages, or help files, which we are not interested in. We also filter them here.</p>
 
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">DATA_DIR</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span>
+<span class="n">GRAPH_FILENAME</span> <span class="o">=</span> <span class="s1">&#39;wiki_graph&#39;</span>
+
+<span class="c1"># we filter out these types of link selectors</span>
+<span class="n">CLEAN</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="s1">&#39;a[id=&quot;top&quot;]&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;a[class=&quot;mw-selflink selflink&quot;]&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;a[class=&quot;image&quot;]&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;a[class=&quot;internal&quot;]&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># we filter out these links</span>
+<span class="n">REM_LINKS</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="sa">r</span><span class="s2">&quot;(\/wiki\/File:\w+)&quot;</span><span class="p">,</span>
+  <span class="sa">r</span><span class="s2">&quot;(\/wiki\/Special:\w+)&quot;</span><span class="p">,</span>
+  <span class="sa">r</span><span class="s2">&quot;(\/wiki\/Template:\w+)&quot;</span><span class="p">,</span>
+  <span class="sa">r</span><span class="s2">&quot;(\/wiki\/Category:\w+)&quot;</span><span class="p">,</span>
+  <span class="sa">r</span><span class="s2">&quot;(\/wiki\/Portal:\w+)&quot;</span><span class="p">,</span>
+  <span class="sa">r</span><span class="s2">&quot;(\/wiki\/Template_talk:\w+)&quot;</span><span class="p">,</span>
+  <span class="sa">r</span><span class="s2">&quot;(\/wiki\/Help:\w+)&quot;</span><span class="p">,</span>
+  <span class="sa">r</span><span class="s2">&quot;(\/wiki\/Wikipedia:\w+)&quot;</span><span class="p">,</span>
+  <span class="sa">r</span><span class="s2">&quot;(^#\w+)&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># main page content selector</span>
+<span class="n">CONT_SEL</span> <span class="o">=</span> <span class="s2">&quot;div#content&quot;</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
 </div>
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Building-a-Bot-With-Semantic-Similarity">Building a Bot With Semantic Similarity<a class="anchor-link" href="#Building-a-Bot-With-Semantic-Similarity">&#182;</a></h2>
-</div>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>This is virtually already done, but we can make it much better and I would love to compare different iterations a la chess bot comparison grid.</strong></p>
+<p>Here, we load the list of pages that we are interested in scraping</p>
 
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># load most popular wikipedia pages csv</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">DATA_DIR</span><span class="si">}</span><span class="s2">/top1000.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># get a list of pages as an array of strings</span>
+<span class="n">urls</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;article&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+<span class="c1"># filter the pages to only articles without &#39;:&#39; in the title</span>
+<span class="c1"># I know this may not cover everything, but I&#39;m just testing here</span>
+<span class="n">urls</span> <span class="o">=</span> <span class="n">urls</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">urls</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
 </div>
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Using-Semantic-Similarity-to-Approximate-Wikipedia-Distance">Using Semantic Similarity to Approximate Wikipedia Distance<a class="anchor-link" href="#Using-Semantic-Similarity-to-Approximate-Wikipedia-Distance">&#182;</a></h3>
+<h1 id="Download-the-Pages-Locally">Download the Pages Locally<a class="anchor-link" href="#Download-the-Pages-Locally">&#182;</a></h1>
 </div>
 </div>
 </div>
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>This seems pointless but makes the statistical analysis straightforward.</strong></p>
+<p>To avoid overwhelming Wikipedia we download every page, unmodified, locally. This allows us to fail multiples times without Wikipedia having to know about it. This is also much faster since we are working with local files. The reason we leave the files unmodified here instead of cleaning them at the same time is that we always want to have the maximum amount of information possible first (in case you need it) and clean it up as a separate step.</p>
+<p>One thing to note here is that we also add a variable <code>START_INDEX</code> to manually start from a particular index in our list of links to scrape. This serves two purposes. The first is in case a special page break our code, we don't have to restart from the beginning to rescrape the pages we already have. The second is for this page not to take 50 hours to compile to HTML.</p>
 
 </div>
 </div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion">&#182;</a></h2>
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># in case you wanna skip ahead</span>
+<span class="n">START_INDEX</span> <span class="o">=</span> <span class="mi">970</span>
+<span class="n">SLEEP_TIME_S</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># dont make less than 2, we dont wanna overwhelm wikipedia too much</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="n">urls</span><span class="o">.</span><span class="n">size</span>
+
+<span class="c1"># compile the title cleanup regex for optimization</span>
+<span class="n">title_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\/&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">urls</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">START_INDEX</span><span class="p">:</span>
+    <span class="k">continue</span>
+
+  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">round</span><span class="p">((</span><span class="n">i</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">%) - Scraping </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+  <span class="c1"># load the page as html with BeautifulSoup</span>
+  <span class="n">res</span> <span class="o">=</span> <span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;https://en.wikipedia.org/wiki/</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+  <span class="c1"># check if we got baned :c</span>
+  <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We got got&quot;</span><span class="p">)</span>
+    <span class="k">break</span>
+
+  <span class="n">html</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+
+  <span class="c1"># save html page as string</span>
+  <span class="n">html_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">prettify</span><span class="p">())</span>
+
+  <span class="c1"># replace bad characters in titles with underscores</span>
+  <span class="n">title</span> <span class="o">=</span> <span class="n">title_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+  <span class="c1"># save file</span>
+  <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">DATA_DIR</span><span class="si">}</span><span class="s2">/pages/</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">.html&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+  <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">html_str</span><span class="p">)</span>
+  <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+  <span class="c1"># let&#39;s not overload wikipedia with requests here</span>
+  <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">SLEEP_TIME_S</span><span class="p">)</span>
+</pre></div>
+
+     </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>We can just compute the two values for random pairs of articles until we have a super low p-value and say boom statistically significant correlation. Will have to consult stat notes to remember what test you're supposed to use for correlation. $\chi^2$?</strong></p>
 
 </div>
-</div>
-</div>
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1 id="Building-the-Graph">Building the Graph<a class="anchor-link" href="#Building-the-Graph">&#182;</a></h1>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;./</span><span class="si">{</span><span class="n">DATA_DIR</span><span class="si">}</span><span class="s2">/pages/&quot;</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">files</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+
+<span class="c1"># list our downloaded files</span>
+<span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;./</span><span class="si">{</span><span class="n">DATA_DIR</span><span class="si">}</span><span class="s2">/pages/&quot;</span><span class="p">)</span>
+<span class="c1"># n = len(list(files))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+  <span class="c1"># extract url from filename</span>
+  <span class="n">url</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+
+  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">round</span><span class="p">((</span><span class="n">i</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">%) - Graphing </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+  <span class="c1"># add the current page to the graph</span>
+  <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+  <span class="c1"># load the page into memory</span>
+  <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+  <span class="n">html</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+  <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+  <span class="c1"># clean up unwanted elements from page</span>
+  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">CLEAN</span><span class="p">:</span>
+    <span class="n">els</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONT_SEL</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">els</span><span class="p">:</span>
+      <span class="n">el</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
+
+  <span class="c1"># further remove unwanted links</span>
+  <span class="n">links</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONT_SEL</span><span class="si">}</span><span class="s2"> a&quot;</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
+    <span class="c1"># extract href from link</span>
+    <span class="n">href</span> <span class="o">=</span> <span class="n">link</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+
+    <span class="c1"># we are only interested in links that start with `/wiki/` and aren&#39;t in REM_LINKS</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">href</span><span class="p">)</span> <span class="k">for</span> <span class="n">regex</span> <span class="ow">in</span> <span class="n">REM_LINKS</span><span class="p">])</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^\/wiki\/\w+&quot;</span><span class="p">,</span> <span class="n">href</span><span class="p">):</span>
+      <span class="c1"># extract href from link</span>
+      <span class="n">href</span> <span class="o">=</span> <span class="n">link</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+
+      <span class="c1"># this is the destination url</span>
+      <span class="n">url_</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\/wiki\/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">href</span><span class="p">)</span>
+
+      <span class="c1"># we only add the destination url if it happens to be inside our links of interests</span>
+      <span class="k">if</span> <span class="n">url_</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
+        <span class="c1"># add edge to graph</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">url_</span><span class="p">)</span>
+
+  <span class="c1"># save our graph at other file</span>
+  <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">nx</span><span class="o">.</span><span class="n">write_gml</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">DATA_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">GRAPH_FILENAME</span><span class="si">}</span><span class="s2">.gml&quot;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>0 of 10 (0.0%) - Graphing 1337x
+1 of 10 (10.0%) - Graphing Battle_of_Kharkiv_(2022)
+2 of 10 (20.0%) - Graphing Bruce_Willis_filmography
+3 of 10 (30.0%) - Graphing Jimmy_Carter
+4 of 10 (40.0%) - Graphing Monaco
+5 of 10 (50.0%) - Graphing Patrick_Swayze
+6 of 10 (60.0%) - Graphing Salman_Khan
+7 of 10 (70.0%) - Graphing Sue_Bird
+8 of 10 (80.0%) - Graphing Sweden
+9 of 10 (90.0%) - Graphing West_Side_Story_(1961_film)
+</pre>
+</div>
+</div>
 
 </div>
+
 </div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># spl = dict(nx.all_pairs_shortest_path_length(G))</span>
+
+<span class="c1"># spl[]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
 </div>
 </body>
 
